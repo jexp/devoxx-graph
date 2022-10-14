@@ -1,0 +1,289 @@
+== Devoxx Belgium 2022 as a Graph
+:imagesdir: img
+:repo: https://github.com/jexp/devoxx-graph/blob/main
+
+Just returning from a week full of reunions, great conversations, interesting talks and good food from Antwerp Belgium, where Devoxx 2022 took place.
+
+Big thanks to the Devoxx Team and all the speakers, organizers and partners. 
+It was a blast.
+
+image::devoxx-karin.jpg[]
+
+In this article we want to share how to do the following:
+
+* Having fun importing the Devoxx Schedule into a graph, and visualizing and querying the data for talk recommendations
+* Deriving a GraphQL schema and with that a queryable API in your browser
+* Running a query against our database with `jbang`
+* Implementing a simple app in spring-boot, quarkus and micronaut using their Neo4j integrations
+
+=== Devoxx Schedule
+
+Before the event we asked Stephan Janssen for an API or CSV for the Devoxx Schedule and thankfully he shared the Swagger API for the conference, which you can find under:
+
+https://dvbe22.cfp.dev/swagger-ui.html
+
+So on our train trip to Antwerp we started to look into it, basically a REST API with JSON responses probably backed by an Spring Boot app.
+
+There were endpoints for fetching rooms, speakers which were pretty minimal.
+
+[source,javascript]
+----
+// https://dvbe22.cfp.dev/api/public/rooms
+[
+  {
+    "id": 4703,
+    "name": "Exhibition Hall",
+    "weight": 1,
+    "capacity": 2000
+  },
+  {
+    "id": 4705,
+    "name": "Room 3",
+    "weight": 3,
+    "capacity": 309
+  },
+]
+----
+
+More interesting was the endpoint for talks, which also included all the speaker details, the topics/tag, the track and also session-type and experience level.
+
+But the best one was the schedule per day endpoint which had everything:
+
+* rooms with name and capacity
+* talks
+** speakers
+** tags
+** track
+* start- and end-times
+* favorites
+
+The `schedules` endpoint listed all 5 days with their URLs.
+
+Perfect for our needs, so we could load the whole conference in one go.
+So we could start modeling our graph and working on the import.
+
+=== Graph Model
+
+The following is a minimal graph model.
+
+We have 5 main entities
+
+* Talk, which is connected to
+* Speaker PRESENTS Talk
+* Talk is TAGGED with Tag 
+* Talk is IN_TRACK Track
+* Talk is IN_ROOM Room
+
+image::devoxx-model.png[]
+
+In a more extensive model, the time-slots can be modeled separtely so it is more obvious which talks are in parallel and how 
+
+But that's also something we can add in post-processing.
+
+=== Get yourself a free graph with AuraDB
+
+In https://console.neo4j.io[Neo4j AuraDB^] you can quickly create a free, blank database.
+
+Make sure to save the credentials file as `devoxx-credentials.env`
+
+=== Get your data in with Data Importer
+
+To make the import easy for you, we prepared a hand-full of CSV files that represent the different entities and relationships.
+
+With those you can use Neo4j's Data Importer
+
+Further down you can see how to do the <<apoc-load-json,import directly from the REST API>> in one go.
+
+=== Visualize interesting Talks through Graph Exploration
+
+
+=== Recommendations with Graph Queries
+
+Neo4j doesn't use SQL but a graph query language called "Cypher", which is represents connections between entities not as a plenthora of `JOIN` statements but with arrows in an ascii-art-syntax `(Neo4j)-[:LOVES]->(Java)`. 
+Entities themselves are enclosed in round parentheses so they look like the circles you've already seen.
+
+Those patterns can be used for finding, creating, updating and validating data in the graph.
+The rest of the query language is pretty similar to SQL, it has just much more support for lists, maps and operations on them and other data structures.
+
+NOTE: There are some other cool features like inline aggregation/filtering/sorting between different query parts and getting rid of `GROUP BY` as it is a unneccessary clause.
+
+Here are some simple queries:
+
+.Find all tracks
+[source,cypher]
+----
+MATCH (t:Track)
+RETURN t
+----
+
+todo table
+
+.Find all talks and speakers in the "Java" track
+[source,cypher]
+----
+MATCH path=(:Track {name:'Java'})<--(:Talk)<-[:PRESENTS]-(:Speaker)
+RETURN path
+----
+
+todo screenshot
+
+.Find the top 10 Tags that talks in the Java Track share and their frequency
+[source,cypher]
+----
+MATCH (tag:Tag)<--(:Talk)-->(tr:Track {name:'Java'})<--(:Talk)-->(tag)
+RETURN tag.name, count(*) as freq
+ORDER BY freq DESC LIMIT 10;
+----
+
+TODO table
+
+Note that the last query is computing the equivalent of an 6-way join.
+
+Now what we're interested in is to create some recommendations for a talk we've seen and liked.
+
+So talks are similar in a few relationships - they can share a speaker, a track or a topic (or a room but that's not indicative of similarity).
+There could also be some attributes that could be similar, like audience leel or session type, but we'll ignore them for now.
+
+[source,cypher]
+----
+
+----
+
+=== GraphQL
+
+Having the data in a database is nice and querying it with Cypher really powerful.
+
+But what if I want to expose (a subset) of my data through an API? (Similar to the REST API we read it from).
+
+Then the neo4j/graphql library can help you to get up and running quickly and offers a lot of flexibility and power down the line.
+
+Just open https://graphql-toolbox.neo4j.io for an in-browser GraphQL model and query editor.
+
+After filling in the connection details it offers to derive a new GraphQL schema from your database, if you do this, you get a pretty good set of type defintions.
+The only bit that's a bit verbose are some of the field-names which we can rename directly in the editor.
+
+image:devoxx-toolbox.png[]
+link:{repo}/devoxx.graphql[GraphQL Type Defintions]
+
+image:devoxx-graphql.png[]
+link:[GraphQL Query]
+
+You can read more in the Documentation for the https://neo4j.com/docs/graphql-manual/current[GraphQL Library and Toolbox^]. 
+
+=== Using Neo4j as Java Developer
+
+Despite the "4j" in the name, Neo4j is a data platform like many others that offers binary and http protocols and a query language, so it can be used from any programming language.
+
+But staying true to our roots and thanks to the work of our developers and community there are great integrations for Java Applications and Java Frameworks.
+
+For all frameworks you find https://neo4j.com/developer/java-frameworks/[documentation on the Neo4j developer pages^].
+
+There are more tools available, like the [Testcontainer integration for Neo4j^] and the schema migration tools - [Neo4j-Migrations^] and [Neo4j for Liquibase^] both from Neo4j Labs.
+
+NOTE: Gerrit Meier will speak about _Testcontainers_ at https://neo4j.com/nodes-2022[NODES 2022 on Nov 17^], Michael Simons about _Neo4j Migrations_ and Florent Biville and Marouane Gazanayi about the _Liquibase integration_.
+
+=== Neo4j Driver with JBang
+
+
+
+=== Spring Boot & Spring Data Neo4j
+
+Just go to https://start.spring.io to create your application, make sure to add `Neo4j-`
+
+image::start-spring.png[]
+
+
+Mark Heckler and Jennifer Reif will both speak on how to use Spring Data Neo4j
+
+=== Quarkus with Neo4j Integration
+
+Quarkus integrates with Neo4j both on the plain driver (which also supports dev-mode for test-containers) and Neo4j-OGM as mapping library.
+
+image::start-quarkus.png[]
+
+https://twitter.com/DaschnerS[Sebastian Daschner^] has created a number of articles and videos on how to use Quarkus with Neo4j and
+
+=== Micronaut with Neo4j Feature
+
+Micronaut comes with built-in Neo4j-drivers support as well, which you can select
+
+image::start-micronaut.png[]
+
+Full OGM functionality for Neo4j was supported via GORM before and will be again in Micronaut-Data after Micronaut 4.0 (we chatted about that with Graeme at Devoxx).
+
+[[apoc-load-json]]
+=== Advanced Data Import with APOC
+
+To load the data directly from the Devoxx REST API we can use [`apoc.load.json`^] to fetch the response in nested Map/List datastructures of Cypher.
+
+Then we use a combination of `MERGE` (aka get-or-create) for the nodes based on their id or name, (`MERGE (sp:Speaker {id:speaker.id})`), set their properties when newly created and then connect them each with relationships (`MERGE (speaker)-[:PRESENTS]->(talk)`).
+
+Another benefit of `MERGE` is that it allows us idempotent imports, so except for start/end-time and favorites nothing will be updated if it already exists in that shape in the graph.
+
+We can use `UNWIND` to turn a list of values into rows so we can iteratively go over talks, speakers or tags.
+
+Initially we fetch the 5 days from the `schedules` endpoint and then iterate and load each individual URL to consume the rooms, their talks and each talk's speaker, track and topics.
+
+[source,cypher]
+----
+CALL apoc.load.json("https://dvbe22.cfp.dev/api/public/schedules") YIELD value
+UNWIND value.links AS day
+
+// load each day's schedule
+CALL apoc.load.json(day.href) YIELD value AS row
+
+// don't load pauses
+WITH row, row.proposal AS talkData 
+WHERE NOT talkData.sessionType.isPause
+
+// add room
+MERGE (r:Room {id:row.room.id})
+ON CREATE SET r.name = row.room.name, r.capacity = row.room.capacity
+
+// add talk
+MERGE (t:Talk {id:talkData.id})
+ON CREATE SET 
+t.title = talkData.title, t.summary = talkData.summary, 
+t.level = talkData.audienceLevel,
+t.duration = talkData.sessionType.duration, 
+t.type = talkData.sessionType.name
+
+SET t.favorites = row.totalFavourites, 
+t.start = datetime(row.fromDate), 
+t.end = datetime(row.toDate)
+
+// connect talk to room
+MERGE (t)-[:IN_ROOM]->(r)
+
+// add and connect track
+MERGE (tr:Track {id:talkData.track.id}) 
+ON CREATE SET tr.name = talkData.track.name, 
+tr.description = talkData.track.description
+MERGE (t)-[:IN_TRACK]->(tr)
+
+with * 
+// add and connect speakers
+UNWIND talkData.speakers AS speaker
+MERGE (sp:Speaker {id:speaker.id})
+ON CREATE SET sp.name = speaker.fullName, 
+sp.company = speaker.company, sp.image = speaker.imageUrl, 
+sp.twitter = speaker.twitterHandle
+MERGE (sp)-[:PRESENTS]->(t)
+
+// reduce cardinality
+with distinct talkData, t
+
+// add tags
+UNWIND talkData.tags AS tag
+MERGE (tg:Tag {name:tag.name})
+MERGE (t)-[:TAGGED]->(tg);
+----
+
+=== Conclusion
+
+This went far deeper than we originally intended, but we couldn't just stop trying more Java technologies with the devoxx-graph.
+
+Michael Simons had set up a https://github.com/michael-simons/neo4j-from-the-jvm-ecosystem[comparision repository^] a while ago, if you're more interested in performance aspects and native image support.
+
+We want to give a huge thanks to the people who made all this possible, https://twitter.com/rotnroll666[Michael Simons^] for SDN and Quarkus, https://twitter.com/meistermeier[Gerrit Meier^] for SDN and https://twitter.com/graemerocher[Graeme Rocher] for Micronaut and the whole Neo4j team (aura, drivers, graphql, cypher, database).
+

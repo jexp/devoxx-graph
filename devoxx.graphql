@@ -1,0 +1,43 @@
+type Room {
+	capacity: BigInt!
+	id: BigInt!
+	name: String!
+	talks: [Talk!]! @relationship(type: "IN_ROOM", direction: IN)
+}
+
+type Speaker {
+	company: String
+	id: BigInt!
+	image: String!
+	name: String!
+	talks: [Talk!]! @relationship(type: "PRESENTS", direction: OUT)
+	twitter: String
+}
+
+type Tag {
+	name: String!
+	tagged: [Talk!]! @relationship(type: "TAGGED", direction: IN)
+}
+
+type Talk {
+	duration: BigInt!
+	end: DateTime!
+	favorites: BigInt!
+	id: BigInt!
+	room: [Room!]! @relationship(type: "IN_ROOM", direction: OUT)
+	track: Track! @relationship(type: "IN_TRACK", direction: OUT)
+	level: String!
+	speakers: [Speaker!]! @relationship(type: "PRESENTS", direction: IN)
+	start: DateTime!
+	summary: String
+	tags: [Tag!]! @relationship(type: "TAGGED", direction: OUT)
+	title: String!
+	type: String!
+}
+
+type Track {
+	description: String!
+	id: BigInt!
+	name: String!
+	talks: [Talk!]! @relationship(type: "IN_TRACK", direction: IN)
+}

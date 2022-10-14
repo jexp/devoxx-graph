@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: org.neo4j
+testFramework: junit
+sourceLanguage: java
+buildTool: maven
+features: [annotation-api, app-name, graphql, http-client, jackson-databind, java, java-application, junit, logback, maven, neo4j-bolt, netty-server, openapi, readme, shade, yaml]

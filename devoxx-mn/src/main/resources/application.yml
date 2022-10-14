@@ -1,0 +1,11 @@
+micronaut:
+  application:
+    name: devoxx
+neo4j:
+  uri: $NEO4J_URI
+  username: $NEO4J_USERNAME 
+  password: $NEO4J_PASSWORD
+netty:
+  default:
+    allocator:
+      max-order: 3

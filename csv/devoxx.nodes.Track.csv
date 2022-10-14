@@ -1,0 +1,11 @@
+:ID,description,name,id,:LABEL
+128,"Modern operational concerns, including build pipelines, orchestration, observability, monitoring, resilience, and compliance, as the software world embraces DevOps and cloud delivery.",Build & Deploy,1254,Track
+129,"All aspects of Java as a platform: emerging or established, Java language, JVM (languages), JDK, frameworks, standards, performance etc",Java,2754,Track
+130,"Developer candy: stuff we want to know about but dont (generally) at work, Robotics, biological computing, cybernetics, AI, new toys, tomorrows world",Mind the Geek,2758,Track
+131,"All about Getting Stuff Done right. Methodologies, better practices, testing & tools.",Development Practices,1701,Track
+132,"Frameworks and libraries which are mainly used on the server-side: Spring (native), Jakarta EE, Reactive frameworks, ORM, MOM, DB, Micro-services frameworks, Quarkus, Micronaut etc.",Server Side Java,1256,Track
+133,"Big Data, NoSQL, Machine learning, Deep Learning, Neural Networks, TensorFlow, etc",Data & AI,1252,Track
+134,"How-to’s, tools and techniques for developers to drive great architectures.  Share your in-the-trenches experiences informing us what works and what doesn't.",Architecture,1251,Track
+135,"Personal development, leadership, working practices, mental health, diversity, inclusion and developer culture",People & Culture,1253,Track
+136,"Encryption, defensive practices, tools and technologies to be secure, security testing etc.",Security,1255,Track
+137,"UI, UX, front-end languages, frameworks and architectures.  This can include Angular, React, Vue, Blazor, Svelte, SCSS best practices etc.",UI & UX,2760,Track

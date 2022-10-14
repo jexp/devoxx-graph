@@ -1,0 +1,402 @@
+:ID,name,:LABEL
+447,Kubernetes,Tag
+448,GitOps,Tag
+449,cluster management,Tag
+450,security best practices,Tag
+451,security,Tag
+452,container,Tag
+453,cloud,Tag
+454,compilation,Tag
+455,memory footprint,Tag
+456,User Interface,Tag
+457,API,Tag
+458,brain,Tag
+459,Agile,Tag
+460,engineering teams,Tag
+461,application development,Tag
+462,AOT,Tag
+463,Spring,Tag
+464,GraalVM,Tag
+465,Quarkus,Tag
+466,NoSQL,Tag
+467,Micronaut,Tag
+468,Cloud Native Java,Tag
+469,Akka Streams,Tag
+470,scala,Tag
+471,Akka,Tag
+472,future,Tag
+473,software ecosystem,Tag
+474,education,Tag
+475,complexity,Tag
+476,Design,Tag
+477,architecture,Tag
+478,Apache Maven,Tag
+479,open source,Tag
+480,build,Tag
+481,SQL,Tag
+482,database,Tag
+483,Distributed Systems,Tag
+484,Cloud Native Applications,Tag
+485,Event-Driven Microservices,Tag
+486,legacy applications,Tag
+487,game,Tag
+488,application architecture,Tag
+489,LLM,Tag
+490,GPT3,Tag
+491,Artificial Intelligence,Tag
+492,human emotions,Tag
+493,Tools,Tag
+494,inclusion,Tag
+495,diversity,Tag
+496,trends,Tag
+497,communities,Tag
+498,JUGs,Tag
+499,sharing knowledge,Tag
+500,Pi4J,Tag
+501,Raspberry Pi,Tag
+502,electronics,Tag
+503,Java,Tag
+504,crypto-currency universe,Tag
+505,enterprise,Tag
+506,Blockchain,Tag
+507,data models,Tag
+508,redis,Tag
+509,Spring Data,Tag
+510,Java SDK,Tag
+511,pitfalls,Tag
+512,Android,Tag
+513,Content Security Policy,Tag
+514,security headers,Tag
+515,CI/CD practices,Tag
+516,serverless,Tag
+517,AWS Lambda,Tag
+518,service mesh,Tag
+519,Istio,Tag
+520,Spring Cloud,Tag
+521,Containerized Microservices,Tag
+522,Azure,Tag
+523,Spring Boot,Tag
+524,secrets,Tag
+525,Apache,Tag
+526,data processing pipelines,Tag
+527,Machine learning,Tag
+528,Python,Tag
+529,user experience,Tag
+530,Javascript,Tag
+531,CSS,Tag
+532,web applications,Tag
+533,React ecosystem,Tag
+534,server-side development,Tag
+535,JavaFX,Tag
+536,fun,Tag
+537,cache,Tag
+538,Continuous Delivery,Tag
+539,Continuous Integration,Tag
+540,debugging problems,Tag
+541,Java 17,Tag
+542,Pattern Matching,Tag
+543,Record,Tag
+544,Development,Tag
+545,bots,Tag
+546,games,Tag
+547,microcontroller,Tag
+548,Rust,Tag
+549,WebAssembly,Tag
+550,Languages,Tag
+551,Servlets,Tag
+552,responsiveness,Tag
+553,components,Tag
+554,CoPilot,Tag
+555,Unit Testing,Tag
+556,product vision,Tag
+557,innovation,Tag
+558,Cucumber,Tag
+559,feedback,Tag
+560,Gherkin,Tag
+561,Real life cases,Tag
+562,debugging,Tag
+563,auto-configuration,Tag
+564,traces,Tag
+565,data teams,Tag
+566,product,Tag
+567,data problems,Tag
+568,software engineering,Tag
+569,OSS,Tag
+570,time-series data,Tag
+571,MicroServices,Tag
+572,Enterprise Java,Tag
+573,vulnerabilities,Tag
+574,Gang of Four,Tag
+575,design pattern,Tag
+576,Docker,Tag
+577,cloud deployments,Tag
+578,microservice,Tag
+579,costs,Tag
+580,OpenJDK,Tag
+581,scalability,Tag
+582,performance,Tag
+583,reliability,Tag
+584,hacks,Tag
+585,JVM,Tag
+586,Functional Java,Tag
+587,Cypher,Tag
+588,graph database,Tag
+589,Big Data,Tag
+590,workflow automation,Tag
+591,DevOps,Tag
+592,AppSec,Tag
+593,Github,Tag
+594,Codespaces,Tag
+595,Smart City,Tag
+596,AI applications,Tag
+597,Git,Tag
+598,frontend,Tag
+599,accessibility,Tag
+600,kNative,Tag
+601,Event Sourcing,Tag
+602,CQRS,Tag
+603,Computer Vision,Tag
+604,Keras,Tag
+605,Neural Networks,Tag
+606,Exceptions,Tag
+607,Reactive Programming,Tag
+608,dependency management,Tag
+609,open source software,Tag
+610,stateful applications,Tag
+611,cloud-native applications,Tag
+612,MicroProfile,Tag
+613,transactions,Tag
+614,testing tools,Tag
+615,best practices,Tag
+616,dataset,Tag
+617,testing,Tag
+618,Web development,Tag
+619,jHipster,Tag
+620,cloud development,Tag
+621,IDE,Tag
+622,Language Server Protocol,Tag
+623,assembly code,Tag
+624,CPU caches,Tag
+625,benchmarking,Tag
+626,logging,Tag
+627,error handling,Tag
+628,functional programming,Tag
+629,Kotlin,Tag
+630,Cloud Computing,Tag
+631,AWS,Tag
+632,frontend development,Tag
+633,Angular,Tag
+634,design patterns,Tag
+635,Project Loom,Tag
+636,performances,Tag
+637,JMH,Tag
+638,tail latencies,Tag
+639,SLAs,Tag
+640,software development,Tag
+641,teams,Tag
+642,career,Tag
+643,development methodologies,Tag
+644,DDD,Tag
+645,communication,Tag
+646,real-world,Tag
+647,server,Tag
+648,throughput,Tag
+649,build automation,Tag
+650,build logic,Tag
+651,Gradle,Tag
+652,protocol,Tag
+653,HTTP,Tag
+654,gRPC,Tag
+655,experience,Tag
+656,software ambitions,Tag
+657,developer,Tag
+658,Software,Tag
+659,automation infrastructure,Tag
+660,load tests,Tag
+661,GraphQL,Tag
+662,graphs,Tag
+663,Neo4j,Tag
+664,DeepFakes,Tag
+665,social media data,Tag
+666,refactoring,Tag
+667,build tools,Tag
+668,Maven,Tag
+669,Java Projects,Tag
+670,evolution,Tag
+671,TDD,Tag
+672,integration test,Tag
+673,network,Tag
+674,code quality,Tag
+675,review,Tag
+676,methodology,Tag
+677,Containers,Tag
+678,Improvements,Tag
+679,Debugger IDE,Tag
+680,skills,Tag
+681,JakartaEE,Tag
+682,AWS IoT,Tag
+683,Java Language,Tag
+684,IoT,Tag
+685,IoT architectures,Tag
+686,Management,Tag
+687,behaviour,Tag
+688,career opportunities,Tag
+689,puzzlers,Tag
+690,Collection Framework,Tag
+691,Java 16,Tag
+692,JVM features,Tag
+693,Features,Tag
+694,changes,Tag
+695,Elasticsearch,Tag
+696,Apache Kafka,Tag
+697,developer problems,Tag
+698,dependencies,Tag
+699,learning,Tag
+700,hobby projects,Tag
+701,React,Tag
+702,AngularJS,Tag
+703,web application,Tag
+704,Webpack,Tag
+705,micro service,Tag
+706,GCP,Tag
+707,operations,Tag
+708,YAML files,Tag
+709,open source project,Tag
+710,Devoxx4Kids BOF,Tag
+711,Loom,Tag
+712,concurrency,Tag
+713,migration,Tag
+714,Wallet,Tag
+715,Google Cloud,Tag
+716,Workflows,Tag
+717,backend topics,Tag
+718,creativity,Tag
+719,Language,Tag
+720,language runtime,Tag
+721,HTML,Tag
+722,Thymeleaf,Tag
+723,Javascript library,Tag
+724,latency,Tag
+725,monitoring,Tag
+726,Vaadin,Tag
+727,messages,Tag
+728,coding demo,Tag
+729,NewSQL,Tag
+730,relational database,Tag
+731,database solutions,Tag
+732,databases,Tag
+733,mocks,Tag
+734,developer tools,Tag
+735,Garbage First Garbage Collector,Tag
+736,Java Virtual Machine,Tag
+737,memory,Tag
+738,software development lifecycle,Tag
+739,OAuth 2.0,Tag
+740,algorithms,Tag
+741,binary,Tag
+742,metrics,Tag
+743,monitoring approach,Tag
+744,Logs,Tag
+745,monitoring environments,Tag
+746,Performance bottlenecks,Tag
+747,performance data,Tag
+748,messaging platforms,Tag
+749,open source projects,Tag
+750,event streams,Tag
+751,Cloud Native Streaming,Tag
+752,analytics,Tag
+753,datastores,Tag
+754,data streaming,Tag
+755,Hibernate,Tag
+756,ORM,Tag
+757,Reactive Streams,Tag
+758,culture,Tag
+759,environment,Tag
+760,panel discussions,Tag
+761,performance applications,Tag
+762,tooling support,Tag
+763,Security improvements,Tag
+764,Encryption,Tag
+765,Plugin,Tag
+766,Verification,Tag
+767,identity,Tag
+768,JS framework,Tag
+769,virtualization,Tag
+770,FaaS,Tag
+771,serverless computing,Tag
+772,Flight Recorder,Tag
+773,javaagent,Tag
+774,Testcontainers,Tag
+775,smartphones,Tag
+776,3D Printing,Tag
+777,WebSockets,Tag
+778,Performance tuning,Tag
+779,Apache Camel,Tag
+780,enterprise integration,Tag
+781,Machine Learning for Developers,Tag
+782,machine learning services,Tag
+783,software designs,Tag
+784,microservices architecture,Tag
+785,tooling,Tag
+786,development tooling,Tag
+787,Development Tools,Tag
+788,libraries,Tag
+789,Deep Dive,Tag
+790,Spring Security,Tag
+791,machine learning models,Tag
+792,explanation,Tag
+793,Progressive Web Apps,Tag
+794,PWA,Tag
+795,Web API,Tag
+796,BPMN,Tag
+797,team,Tag
+798,JUnit 5,Tag
+799,music,Tag
+800,technology,Tag
+801,JDK,Tag
+802,demo,Tag
+803,careers,Tag
+804,lead,Tag
+805,diagrams,Tag
+806,news,Tag
+807,security breaches,Tag
+808,security technologies,Tag
+809,observables,Tag
+810,frameworks,Tag
+811,programming,Tag
+812,multithreading,Tag
+813,Threads,Tag
+814,coroutines,Tag
+815,Information Technology,Tag
+816,video processing,Tag
+817,community,Tag
+818,polyglot persistence,Tag
+819,application architectures,Tag
+820,domain model,Tag
+821,value types,Tag
+822,history,Tag
+823,information,Tag
+824,Devoxx BE,Tag
+825,Welcome & Announcements,Tag
+826,application generator,Tag
+827,motivation,Tag
+828,independence,Tag
+829,freedom,Tag
+830,networking,Tag
+831,caching,Tag
+832,CDI,Tag
+833,persistence,Tag
+834,versioning,Tag
+835,journey,Tag
+836,share,Tag
+837,Word2Vec,Tag
+838,fastText,Tag
+839,Java 19,Tag
+840,Live Coding & Demos,Tag
+841,code examples,Tag
+842,authentication,Tag
+843,SSO,Tag
+844,privacy,Tag
+845,Public-Key,Tag
+846,GDPR,Tag
+847,security breach,Tag
