@@ -7,7 +7,7 @@ Just returning from a week full of reunions, great conversations, interesting ta
 Big thanks to the Devoxx Team and all the speakers, organizers and partners. 
 It was a blast.
 
-image::devoxx-karin.jpg[]
+image::devoxx-booth.jpg[]
 
 In this article we want to share how to do the following:
 
