@@ -18,7 +18,7 @@ In this article we want to share how to do the following:
 * Having fun importing the Devoxx Schedule into a graph, and visualizing and querying the data for talk recommendations
 * Deriving a GraphQL schema and with that a queryable API in your browser
 * Running a query against our database with `jbang`
-* Implementing a simple app in spring-boot, quarkus and micronaut using their Neo4j integrations
+* Implementing a simple app in Spring Boot, Quarkus and Micronaut using their Neo4j integrations
 
 === Devoxx Schedule
 
@@ -63,6 +63,8 @@ But the best one was the schedule per day endpoint which had everything:
 
 The `schedules` endpoint listed all 5 days with their URLs.
 
+image::devoxx-swagger-api.png[]
+
 Perfect for our needs, so we could load the whole conference in one go.
 So we could start modeling our graph and working on the import.
 
@@ -92,9 +94,26 @@ Make sure to save the credentials file as `devoxx-credentials.env`
 
 === Get your data in with Data Importer
 
-To make the import easy for you, we prepared a hand-full of CSV files that represent the different entities and relationships.
+You can use Neo4j's Data Importer from the AuraDB UI to map and import CSV data.
 
-With those you can use Neo4j's Data Importer
+To make the import easy for you, we prepared a link:{repo}/csv[hand-full of CSV files^] that represent the different entities and relationships.
+
+image::devoxx-data-importer.png[]
+
+1. Add the CSV files in the left side-panel
+2. Add nodes, give them a type
+3. You can drag out a relationship from the "halo" around a node, give them a name
+4. For Nodes pick a CSV file to map in the right mapping panel, then select the properties from the file
+5. Make sure an `id` property is selected
+6. For relationships after picking the file, select the start and end accordingly
+
+NOTE: If you don't want to model and map yourself, you can also load the link:{repo}/csv/devoxx-data-importer-2022-10-12.zip[prepared model with data^] into data importer in the `...` menu.
+
+Then you can "preview" your import visually, and if you're satisfied "run the import".
+
+It takes only a second or two to load.
+
+Afterwards you can open the "Query" part of the UI and start exploring your graph data.
 
 Further down you can see how to do the <<apoc-load-json,import directly from the REST API>> in one go.
 
@@ -117,29 +136,57 @@ Here are some simple queries:
 [source,cypher]
 ----
 MATCH (t:Track)
-RETURN t
+RETURN t.name, t.description
 ----
 
-todo table
+image::devoxx-tracks.png[]
 
-.Find all talks and speakers in the "Java" track
+When you run `call db.schema.visualization` you see a graph visualization of the data in the database which should match your import model.
+
+image::devoxx-schema-browser.png[]
+
+.Find all talks and speakers in the 'Server Side Java' track
 [source,cypher]
 ----
-MATCH path=(:Track {name:'Java'})<--(:Talk)<-[:PRESENTS]-(:Speaker)
+MATCH path=(:Track {name:'Server Side Java'})<--(:Talk)<-[:PRESENTS]-(:Speaker)
 RETURN path
 ----
 
-todo screenshot
+image::devoxx-track-browser.png[]
 
 .Find the top 10 Tags that talks in the Java Track share and their frequency
 [source,cypher]
 ----
-MATCH (tag:Tag)<--(:Talk)-->(tr:Track {name:'Java'})<--(:Talk)-->(tag)
-RETURN tag.name, count(*) as freq
+MATCH (tag:Tag)<--(t:Talk)-->(tr:Track {name:'Java'})<--(:Talk)-->(tag)
+RETURN tag.name, count(distinct t) as freq
 ORDER BY freq DESC LIMIT 10;
 ----
 
-TODO table
+----
+╒═══════════════════╤══════╕
+│"tag.name"         │"freq"│
+╞═══════════════════╪══════╡
+│"Java"             │18    │
+├───────────────────┼──────┤
+│"Java 17"          │7     │
+├───────────────────┼──────┤
+│"Java 19"          │4     │
+├───────────────────┼──────┤
+│"OpenJDK"          │4     │
+├───────────────────┼──────┤
+│"Project Loom"     │4     │
+├───────────────────┼──────┤
+│"Functional Java"  │3     │
+├───────────────────┼──────┤
+│"LLM"              │3     │
+├───────────────────┼──────┤
+│"Devoxx BE"        │3     │
+├───────────────────┼──────┤
+│"Java 18"          │3     │
+├───────────────────┼──────┤
+│"Cloud Native Java"│3     │
+└───────────────────┴──────┘
+----
 
 Note that the last query is computing the equivalent of an 6-way join.
 
