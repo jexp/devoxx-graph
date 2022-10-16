@@ -13,11 +13,11 @@ import org.springframework.data.neo4j.repository.config.*;
 @EnableNeo4jRepositories(considerNestedRepositories=true)
 public class DevoxxApplication implements CommandLineRunner {
 
-	@Autowired TalkRepository repo;
-
 	public static void main(String[] args) {
 		SpringApplication.run(DevoxxApplication.class, args);
 	}
+
+	@Autowired TalkRepository repo;
 
 	public void run(String...args) {
 		repo.findByTitleContaining(args[0]).forEach(System.out::println);

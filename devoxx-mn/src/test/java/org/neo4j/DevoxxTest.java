@@ -11,18 +11,18 @@ import jakarta.inject.Inject;
 class DevoxxTest {
 
     @Inject
-    EmbeddedApplication<?> application;
-
-    @Inject
     DevoxxController controller;
 
-    @Test
-    void testItWorks() {
-        Assertions.assertTrue(application.isRunning());
-    }
     @Test
     void testTalks() {
         Assertions.assertEquals(216, controller.talks().size());
     }
 
+    @Inject
+    EmbeddedApplication<?> application;
+
+    @Test
+    void testItWorks() {
+        Assertions.assertTrue(application.isRunning());
+    }
 }

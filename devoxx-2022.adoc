@@ -1,3 +1,7 @@
+https://dvbe22.cfp.dev/api/public/schedules/tuesday
+
+https://github.com/neo4j/jbang-catalog/blob/main/hello_neo4j.java
+
 == Devoxx Belgium 2022 as a Graph
 :imagesdir: img
 :repo: https://github.com/jexp/devoxx-graph/blob/main
@@ -182,34 +186,359 @@ There are more tools available, like the [Testcontainer integration for Neo4j^] 
 
 NOTE: Gerrit Meier will speak about _Testcontainers_ at https://neo4j.com/nodes-2022[NODES 2022 on Nov 17^], Michael Simons about _Neo4j Migrations_ and Florent Biville and Marouane Gazanayi about the _Liquibase integration_.
 
-=== Neo4j Driver with JBang
+=== Neo4j Driver with jbang
 
+https://jbang.dev[jbang^] is an awesome way to do scripting in Java. 
+Not only can you define your dependencies within your Java file, you also don't need any project setup.
 
+It also can execute remote files and offers a catalogue. The possibilities are endless.
+
+We want to use jbang here to show how to use the Neo4j Java Driver directly.
+To parse command line parameters we're utilizing the powerful picocli library.
+
+We can execute a demo script from GitHub directly (after approving it), which returns the number of nodes and relationships in our database.
+
+[source,java]
+----
+source devoxx-credentials.env
+jbang https://github.com/neo4j/jbang-catalog/blob/main/hello_neo4j.java -u $NEO4J_USERNAME -p $NEO4J_PASSWORD $NEO4J_URI
+
+# Statistics[version=4.4-aura, totalNodes=869, totalRelationships=1557]
+----
+
+If we download the file and modify it a bit, we can now execute a query that fetches talks with a certain tag.
+
+1. create the driver with the credentials
+2. open a session
+3. open a `readTransaction`
+4. run the query with parameters
+5. process the results
+
+[source,java]
+----
+@Override
+public Integer call() throws Exception {
+    try (var driver = GraphDatabase.driver(uri, 
+         AuthTokens.basic(username, password))) {
+
+        printTalks(driver);
+
+    }
+    return 0;
+};
+
+private static final String QUERY = """
+    MATCH (sp:Speaker)-[:PRESENTS]->(t:Talk)-[:TAGGED]->(tag:Tag) 
+    WHERE toLower(tag.name) contains toLower($tag)
+    RETURN t.title as title, sp.name as name
+    LIMIT 10
+    """;
+
+private void printTalks(Driver driver) {
+    try (var session = driver.session()) {
+        var result = session
+            .readTransaction(t ->
+                t.run(QUERY,Map.of("tag",tag))
+                .list(r -> r.asMap()));
+
+        result.forEach(System.out::println);
+    }
+}
+----
+
+So we can call it with the "spring" tag, and see what it returns.
+
+[source,shell]
+----
+. devoxx-credentials.env
+jbang devoxx_neo4j.java -t spring  -u $NEO4J_USERNAME -p $NEO4J_PASSWORD $NEO4J_URI
+
+{title=Introducing Spring Framework 6.0, name=Stéphane Nicoll}
+{title=Introducing Spring Framework 6.0, name=Brian Clozel}
+{title=Ahead Of Time and Native in Spring Boot 3.0, 
+ name=Brian Clozel}
+{title=Ahead Of Time and Native in Spring Boot 3.0, 
+ name=Stéphane Nicoll}
+{title=A Java developer Journey into Apache Cassandra™, 
+ name=Cedrick Lunven}
+{title= From Serverful to Serverless Java with AWS Lambda, 
+ name=Maximilian Schellhorn}
+{title= From Serverful to Serverless Java with AWS Lambda, 
+ name=Dennis Kieselhorst}
+{title=Spring Security, demystified,  name=Daniel Garnier-Moiroux}
+{title=Spring + Kotlin = Modern + Reactive + Productive, 
+ name=James Ward}
+{title=Spring + Kotlin = Modern + Reactive + Productive, 
+ name=Josh Long}
+----
 
 === Spring Boot & Spring Data Neo4j
 
-Just go to https://start.spring.io to create your application, make sure to add `Neo4j-`
+Neo4j has been integrated into Spring and Spring Data for more than 12 years.
+Actually Rod Johnson and Emil Eifrem worked on the very first version of "Spring Data Graph" (that I then inherited) in 2010 which was the founding project of the Spring Data efforts.
+
+Now we're in version 6 of the library, which is also compatible with Spring Boot 3 / Spring Framework 6 and Java 17.
+
+Here you can find an https://neo4j.com/developer/spring-data-neo4j[introduction and overview^].
+
+Just go to https://start.spring.io to create your application, make sure to add `Spring Data Neo4j` as a dependency before you download the project.
 
 image::start-spring.png[]
 
+We load our credentials file into `application.properties` to then use the environment variables for the database connection information.
 
-Mark Heckler and Jennifer Reif will both speak on how to use Spring Data Neo4j
+[source,ini]
+----
+spring.config.import=optional:file:../devoxx-credentials.env
+spring.neo4j.uri=$NEO4J_URI
+spring.neo4j.authentication.username=$NEO4J_USERNAME
+spring.neo4j.authentication.password=$NEO4J_PASSWORD
+----
+
+In our [Spring Boot App^] we add a few annotated entity classes for our our domain `Talk`, `Speaker` and `Tag` with a minimal `toString` method each.
+Note the `Relationship` annotation on reference-fields that tell the framework how to map these to the graph database.
+
+Then we can add a `TalkRepository` and a `findTalkByTitleContaining` derived finder method.
+
+With `@EnableNeo4jRepositories` we configure Spring-Boot so that our Spring Data Neo4j repositories are scanned for and found.
+
+And then we use the injected repository to find and list talks with the title provided as a command line parameter `-Dspring-boot.run.arguments=Secur`
+
+[source,java]
+----
+@Autowired TalkRepository repo;
+
+public void run(String...args) {
+    repo.findByTitleContaining(args[0]).forEach(System.out::println);
+}
+
+public interface TalkRepository extends Neo4jRepository<Talk, Long> {
+    List<Talk> findByTitleContaining(String title);
+}
+
+@Node
+static class Talk {
+    @Id
+    Long id;
+    String title;
+    @Relationship(type="TAGGED", direction=OUTGOING)
+    List<Tag> tags;
+    public String toString() { return title + " " + tags; }
+}
+@Node
+static class Speaker {
+    @Id
+    Long id;
+    String name;
+    @Relationship(type="PRESENTS", direction=OUTGOING)
+    List<Talk> talks;
+    public String toString() { return name + " " + talks; }
+}
+@Node
+static class Tag {
+    @Id
+    String name;
+
+    public String toString() { return name; }
+}
+----
+
+Running the app with `mvn spring-boot:run` gives us the expected result of the talk titles and their tags.
+
+[source,text]
+----
+./mvnw spring-boot:run -Dspring-boot.run.arguments=Secur
+[INFO] --------------------------< org.neo4j:devoxx >--------------------------
+[INFO] Building devoxx 0.0.1-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] --- spring-boot-maven-plugin:3.0.0-SNAPSHOT:run (default-cli) @ devoxx ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::       (v3.0.0-SNAPSHOT)
+
+DevoxxApplication       : Starting DevoxxApplication using Java 19 on Ombatis.local with PID 77176 (/Users/neo4j/devoxx/devoxx-spring/target/classes started by neo4j in /Users/neo4j/devoxx/devoxx-spring)
+2022-10-12T21:13:56.180+02:00  INFO 77176 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Neo4j repositories in DEFAULT mode.
+2022-10-12T21:13:56.238+02:00  INFO 77176 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 55 ms. Found 1 Neo4j repository interfaces.
+2022-10-12T21:13:56.634+02:00  INFO 77176 --- [           main] org.neo4j.devoxx.DevoxxApplication       : Started DevoxxApplication in 0.982 seconds (process running for 1.117)
+
+Spring Security, demystified [Deep Dive, Spring, Spring Security]
+The Hacker’s Guide to Kubernetes Security [vulnerabilities, Kubernetes, security, demo]
+The Practice of Securing Kubernetes [security, Cloud Native Applications, Kubernetes]
+Zero Trust Security for your APIs [Content Security Policy, security, API, enterprise integration, security breach, security best practices]
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+----
+
+Mark Heckler will speak at NODES on how to use Spring and Neo4j on Azure.
+// Let's Get Functional! Pull Off a Trifecta With Spring Cloud Function, Azure Functions, and Neo4j
 
 === Quarkus with Neo4j Integration
 
-Quarkus integrates with Neo4j both on the plain driver (which also supports dev-mode for test-containers) and Neo4j-OGM as mapping library.
+Quarkus integrates with Neo4j both on the plain driver (which also supports dev-mode for test-containers) and Neo4j-OGM as mapping library, both working also with native image support (with the necessary reflection-metadata).
+
+Again we got to https://code.quarkus.io and configure the neo4j and rest extensions before downloading our project.
 
 image::start-quarkus.png[]
 
-https://twitter.com/DaschnerS[Sebastian Daschner^] has created a number of articles and videos on how to use Quarkus with Neo4j and
+We can make our credentials file available as `.env` file to quarkus to use the environment variables for our database credentials in `application.properties`.
 
+Here in the quarkus controller, we get the driver injected an then can run the query to return all our talk titles, note that we're using our session in a try-with-resource as short-lived means of interaction with the database.
+
+[source,java]
+----
+@Path("/api")
+public class DevoxxResource {
+
+    @Inject Driver driver;
+
+    private static String TALKS_QUERY = """
+            MATCH (t:Talk) RETURN t.title as title;
+            """;
+    @GET
+    @Path("/talks")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<String> talks() {
+        try (var session = driver.session()) {
+            return session.run(TALKS_QUERY)
+            .list(r -> r.get("title").asString());
+        }
+    }
+}
+----
+
+[source,text]
+----
+__  ____  __  _____   ___  __ ____  ______ 
+ --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+ -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+--\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+2022-10-14 18:47:23,891 INFO  [org.neo.dri.int.DriverFactory] (Quarkus Main Thread) 
+Routing driver instance 728166027 created for server address f9b5e1b6.databases.neo4j.io:7687
+2022-10-14 18:47:24,001 INFO  [io.quarkus] (Quarkus Main Thread) 
+devoxx-quarkus 1.0.0-SNAPSHOT on JVM (powered by Quarkus 2.13.1.Final) started in 1.546s. 
+Listening on: http://localhost:8080
+2022-10-14 18:47:24,003 INFO  [io.quarkus] (Quarkus Main Thread) 
+Profile dev activated. Live Coding activated.
+2022-10-14 18:47:24,003 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: 
+[cdi, neo4j, resteasy, resteasy-jackson, smallrye-context-propagation, vertx]
+
+--
+Press [r] to resume testing, [o] Toggle test output, [:] for the terminal, 
+      [h] for more options>
+----
+
+We can then open our API in the browser and see the talks listed.
+
+image::devoxx-our-api.png[]
+
+https://twitter.com/DaschnerS[Sebastian Daschner^] has created a number of https://blog.sebastian-daschner.com/tags/neo4j[articles and videos^] on how to use Quarkus with Neo4j and https://www.youtube.com/watch?v=H4FI19b4FMA[Michael Simons has talked about the Quarkus integrations with the Redhat team^].
+
+Sebatian will be speaking about "Building Java Applications With Quarkus and Neo4j" at NODES 2022.
+
+[[micronaut]]
 === Micronaut with Neo4j Feature
 
-Micronaut comes with built-in Neo4j-drivers support as well, which you can select
+Micronaut has always had built-in Neo4j-driver support as well, which you can select in https://start.micronaut.io as a feature.
 
 image::start-micronaut.png[]
 
-Full OGM functionality for Neo4j was supported via GORM before and will be again in Micronaut-Data after Micronaut 4.0 (we chatted about that with Graeme at Devoxx).
+NOTE: Full OGM functionality for Neo4j was supported via GORM before and will be again in Micronaut-Data after Micronaut 4.0 (we chatted about that with Graeme at Devoxx).
+
+Here our Micronaut app is similar to the Quarkus App in that it lists two endpoints for listing talks and talks by speaker.
+
+What's nice in Micronaut is that you can define your API in an interface, and then use that interface for your controller but also injected into your tests for accessing that API in a typesafe manner.
+
+.Interface DevoxxController.java
+[source,java]
+----
+interface DevoxxController {
+    @Get("/talks")
+    public List<String> talks();
+
+    @Get("/talks/{speaker}")
+    public List<String> talksForSpeaker(String speaker);
+}
+----
+
+.Controller Implementation DevoxxControllerImpl.java
+[source,java]
+----
+@Controller("/api")
+public class DevoxxControllerImpl implements DevoxxController {
+
+    private final Driver driver;
+    public DevoxxControllerImpl(Driver driver) {
+        this.driver = driver;
+    }
+
+    public List<String> talks() {
+        try (var session = driver.session()) {
+            return session
+            .run("MATCH (t:Talk) RETURN t.title as title")
+            .list(r -> r.get("title").asString());
+        }
+    }
+
+    public List<String> talksForSpeaker(String speaker) {
+        try (var session = driver.session()) {
+            var query = """
+            MATCH (sp:Speaker)-[:PRESENTS]->(t:Talk) 
+            WHERE sp.name contains $name 
+            RETURN t.title as title
+            """;
+            return session
+                .run(query, Map.of("name",speaker))
+                .list(r -> r.get("title").asString());
+        }
+    }
+}
+----
+
+.Test DevoxxTest.java
+[source,java]
+----
+@MicronautTest
+class DevoxxTest {
+
+    @Inject
+    DevoxxController controller;
+
+    @Test
+    void testTalks() {
+        Assertions.assertEquals(216, 
+            controller.talks().size());
+    }
+}
+----
+
+[source,text]
+----
+./mvnw mn:run
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------------< org.neo4j:devoxx >--------------------------
+[INFO] Building devoxx 0.1
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> micronaut-maven-plugin:3.4.0:run (default-cli) > process-classes @ devoxx >>>
+ __  __ _                                  _   
+|  \/  (_) ___ _ __ ___  _ __   __ _ _   _| |_ 
+| |\/| | |/ __| '__/ _ \| '_ \ / _` | | | | __|
+| |  | | | (__| | | (_) | | | | (_| | |_| | |_ 
+|_|  |_|_|\___|_|  \___/|_| |_|\__,_|\__,_|\__|
+  Micronaut (v3.7.1)
+
+18:46:32.086 [main] INFO  io.micronaut.runtime.Micronaut - Startup completed in 397ms. Server Running: http://localhost:8080
+----
+
+We then can open the http://localhost:8080/api/talks/Mario%20Fusco endpoint in our browser or with curl to see the response.
 
 [[apoc-load-json]]
 === Advanced Data Import with APOC
