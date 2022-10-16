@@ -63,7 +63,7 @@ But the best one was the schedule per day endpoint which had everything:
 
 The `schedules` endpoint listed all 5 days with their URLs.
 
-image::devoxx-swagger-api.png[]
+image::devoxx-swagger-api.png[height=500]
 
 Perfect for our needs, so we could load the whole conference in one go.
 So we could start modeling our graph and working on the import.
@@ -91,6 +91,8 @@ But that's also something we can add in post-processing.
 In https://console.neo4j.io[Neo4j AuraDB^] you can quickly create a free, blank database.
 
 Make sure to save the credentials file as `devoxx-credentials.env`
+
+image::devoxx-aura.png[]
 
 === Get your data in with Data Importer
 
