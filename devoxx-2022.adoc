@@ -80,7 +80,7 @@ We have 5 main entities
 * Talk is IN_TRACK Track
 * Talk is IN_ROOM Room
 
-image::devoxx-model.png[]
+image::devoxx-model.png[width=600]
 
 In a more extensive model, the time-slots can be modeled separtely so it is more obvious which talks are in parallel and how 
 
@@ -92,7 +92,7 @@ In https://console.neo4j.io[Neo4j AuraDB^] you can quickly create a free, blank 
 
 Make sure to save the credentials file as `devoxx-credentials.env`
 
-image::devoxx-aura.png[]
+image::devoxx-aura.png[width=400]
 
 === Get your data in with Data Importer
 
@@ -215,11 +215,57 @@ Just open https://graphql-toolbox.neo4j.io for an in-browser GraphQL model and q
 After filling in the connection details it offers to derive a new GraphQL schema from your database, if you do this, you get a pretty good set of type defintions.
 The only bit that's a bit verbose are some of the field-names which we can rename directly in the editor.
 
-image:devoxx-toolbox.png[]
-link:{repo}/devoxx.graphql[GraphQL Type Defintions]
+// image:devoxx-toolbox.png[]
+.link:{repo}/devoxx.graphql[GraphQL Type Defintions]
+[source,graphql]
+----
+type Room {
+	capacity: BigInt!
+	id: BigInt!
+	name: String!
+	talks: [Talk!]! @relationship(type: "IN_ROOM", direction: IN)
+}
 
-image:devoxx-graphql.png[]
-link:[GraphQL Query]
+type Speaker {
+	company: String
+	id: BigInt!
+	image: String!
+	name: String!
+	talks: [Talk!]! @relationship(type: "PRESENTS", direction: OUT)
+	twitter: String
+}
+
+type Tag {
+	name: String!
+	tagged: [Talk!]! @relationship(type: "TAGGED", direction: IN)
+}
+
+type Talk {
+	duration: BigInt!
+	end: DateTime!
+	favorites: BigInt!
+	id: BigInt!
+	room: [Room!]! @relationship(type: "IN_ROOM", direction: OUT)
+	track: Track! @relationship(type: "IN_TRACK", direction: OUT)
+	level: String!
+	speakers: [Speaker!]! @relationship(type: "PRESENTS", direction: IN)
+	start: DateTime!
+	summary: String
+	tags: [Tag!]! @relationship(type: "TAGGED", direction: OUT)
+	title: String!
+	type: String!
+}
+
+type Track {
+	description: String!
+	id: BigInt!
+	name: String!
+	talks: [Talk!]! @relationship(type: "IN_TRACK", direction: IN)
+}
+----
+
+.GraphQL Query & Result
+image:devoxx-graphql.png[link={repo}/devoxx-query.graphql]
 
 You can read more in the Documentation for the https://neo4j.com/docs/graphql-manual/current[GraphQL Library and Toolbox^]. 
 
