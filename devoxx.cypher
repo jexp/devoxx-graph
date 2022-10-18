@@ -1,3 +1,26 @@
+MATCH p = (sp:Speaker)-[:PRESENTS]->(t:Talk)-->(tr:Track {name:"Server Side Java"})
+RETURN p
+
+MATCH (t:Talk)--(x)--(reco:Talk)
+WHERE t.title contains 'Micronaut' and id(t) < id(reco) and not x:Room
+RETURN reco.title, count(*) as freq, apoc.coll.frequenciesAsMap(apoc.coll.flatten(collect(labels(x)))) as overlap 
+ORDER BY freq DESC LIMIT 5;
+
+MATCH (t:Talk)--(x)--(reco:Talk)
+WHERE t.title contains 'Micronaut' and id(t) < id(reco) and not x:Room
+WITH reco, head(labels(x)) as type, count(*) as count
+RETURN reco.title, sum(count) as freq, collect([type,count]) as overlap
+ORDER BY freq DESC LIMIT 5;
+
+MATCH (t:Talk)
+WHERE t.title contains 'Micronaut'
+WITH t LIMIT 1
+MATCH (t)--(x)--(reco:Talk)
+WHERE id(t) < id(reco) and not x:Room
+WITH reco, head(labels(x)) as type, x.name as what, count(*) as count
+RETURN reco.title, sum(count) as freq, collect([type,what,count]) as overlap
+ORDER BY freq DESC LIMIT 5;
+
 create constraint speaker_id for (sp:Speaker) require (sp.id) is unique;
 create constraint talk_id for (t:Talk) require (t.id) is unique;
 create constraint tag_id for (t:Tag) require (t.name) is unique;

@@ -2,7 +2,7 @@
 :imagesdir: img
 :repo: https://github.com/jexp/devoxx-graph/blob/main
 
-Just returning from a week full of reunions, great conversations, interesting talks and good food from Antwerp Belgium, where Devoxx 2022 took place.
+Just returning from a week full of reunions, great conversations, interesting talks and good company from Antwerp Belgium, where Devoxx 2022 took place.
 
 Big thanks to the Devoxx Team and all the speakers, organizers and partners. 
 It was a blast.
@@ -18,13 +18,13 @@ In this article we want to share how to do the following:
 
 === Devoxx Schedule
 
-Before the event we asked Stephan Janssen for an API or CSV for the Devoxx Schedule and thankfully he shared the Swagger API for the conference, which you can find under:
+Before the event we asked https://twitter.com/stephan007[^Stephan Janssen^] for an API or CSV for the Devoxx Schedule and thankfully he shared the Swagger API for the conference, which you can find under:
 
 https://dvbe22.cfp.dev/swagger-ui.html
 
 So on our train trip to Antwerp we started to look into it, basically a REST API with JSON responses probably backed by an Spring Boot app.
 
-There were endpoints for fetching rooms, speakers which were pretty minimal.
+There were endpoints for fetching *rooms* and *speakers* which were pretty minimal.
 
 [source,javascript]
 ----
@@ -45,9 +45,9 @@ There were endpoints for fetching rooms, speakers which were pretty minimal.
 ]
 ----
 
-More interesting was the endpoint for talks, which also included all the speaker details, the topics/tag, the track and also session-type and experience level.
+More interesting was the endpoint for *talks*, which also included all the speaker details, the topics/tag, the track and also session-type and experience level.
 
-But the best one was the https://dvbe22.cfp.dev/api/public/schedules/tuesday[schedule per day endpoint^] which had everything:
+But the best one was the https://dvbe22.cfp.dev/api/public/schedules/tuesday[*schedule per day endpoint*^] which had everything:
 
 * rooms with name and capacity
 * talks
@@ -57,31 +57,35 @@ But the best one was the https://dvbe22.cfp.dev/api/public/schedules/tuesday[sch
 * start- and end-times
 * favorites
 
-The https://dvbe22.cfp.dev/api/public/schedules[`schedules`^] endpoint listed all 5 days with their URLs.
+The https://dvbe22.cfp.dev/api/public/schedules[*schedules*^] endpoint listed all 5 days with their URLs.
 
-image::devoxx-swagger-api.png[height=500]
+image::devoxx-swagger-api.png[height=500,link=https://dvbe22.cfp.dev/api/public/schedules]
 
 Perfect for our needs, so we could load the whole conference in one go.
+If you want to, you can jump to the more <<apoc-load-json,sophisticated load approach>> otherwise follow the easier steps.
+
 So now we can start modeling our graph and working on the import.
 
+[[model]]
 === Graph Model
 
 The following is a minimal graph model.
 
 We have 5 main entities
 
-* Talk, which is connected to
-* Speaker PRESENTS Talk
-* Talk is TAGGED with Tag 
-* Talk is IN_TRACK Track
-* Talk is IN_ROOM Room
+* *Talk*, which is our central entity
+* *Speaker* PRESENTS Talk
+* Talk is TAGGED with *Tag* 
+* Talk is IN_TRACK *Track*
+* Talk is IN_ROOM *Room*
 
 image::devoxx-model.png[width=600]
 
-In a more extensive model, the time-slots can be modeled separtely so it becomes more obvious which talks are in parallel and how the time-slots follow each other.
+In a more extensive model, the time-slots can be modeled separately so it becomes more obvious which talks are in parallel and how the time-slots follow each other.
 
 But that's also something we can add in post-processing.
 
+[[auradb]]
 === Get yourself a free graph instance with AuraDB
 
 In https://console.neo4j.io[Neo4j AuraDB^] you can quickly create a free, blank database.
@@ -92,18 +96,18 @@ image::devoxx-aura.png[width=400,link=https://console.neo4j.io]
 
 === Get your data in with Data Importer
 
-You can use Neo4j's Data Importer from the AuraDB UI to map and import CSV data.
+We can use Neo4j's "Data Importer" from the AuraDB UI to map and import CSV data.
 
 To make the import easy for you, we prepared a link:{repo}/csv[hand-full of CSV files^] that represent the different entities and relationships.
 
 image::devoxx-data-importer.png[]
 
-1. Add the CSV files in the left side-panel
-2. Add nodes, give them a type
-3. You can drag out a relationship from the "halo" around a node, give them a name
-4. For Nodes pick a CSV file to map in the right mapping panel, then select the properties from the file
-5. Make sure an `id` property is selected
-6. For relationships after picking the file, select the start and end accordingly
+1. Add the *CSV files* in the left side-panel
+2. Add *nodes* in the modeling canvas, give them a type
+3. You can drag out a *relationship* from the "halo" around a node, and give them a name
+4. For nodes pick a *CSV file to map* in the right mapping panel, then select the properties from the file
+5. Make sure an *id-property* is selected
+6. For relationships after picking the file, select the *start and end* accordingly
 
 NOTE: If you don't want to model and map yourself, you can also load the link:{repo}/csv/devoxx-data-importer-2022-10-12.zip[prepared model with data^] into data importer in the `...` menu.
 
@@ -115,23 +119,25 @@ Afterwards you can open the "Query" part of the UI and start exploring your grap
 
 Further down you can see how to do the <<apoc-load-json,import directly from the REST API>> in one go.
 
+////
 === Visualize interesting Talks through Graph Exploration
 
 TODO
+////
 
 === Recommendations with Graph Queries
 
-Neo4j doesn't use SQL but a graph query language called "Cypher", which is represents connections between entities not as a plenthora of `JOIN` statements but with arrows in an ascii-art-syntax `(Neo4j)-[:LOVES]->(Java)`. 
+Neo4j doesn't use SQL but a graph query language called https://neo4j.com/developer/cypher["Cypher"^], which is represents connections between entities not as a plenthora of `JOIN` statements but with arrows in an ascii-art-syntax `(Neo4j)-[:LOVES]->(Java)`. 
 Entities themselves are enclosed in round parentheses so they look like the circles you've already seen.
 
 Those patterns can be used for finding, creating, updating and validating data in the graph.
 The rest of the query language is pretty similar to SQL, it has just much more support for lists, maps and operations on them and other data structures.
 
-NOTE: There are some other cool features like inline aggregation/filtering/sorting between different query parts and getting rid of `GROUP BY` as it is a unneccessary clause.
+NOTE: There are some other cool features like inline aggregation/filtering/sorting between different query parts and getting rid of `GROUP BY` as it is a unneccessary clause (more in the https://neo4j.com/docs/cypher-refcard[Cypher Cheat Sheet^]).
 
 Here are some simple queries:
 
-.Find all tracks
+.Find all tracks and return their attributes
 [source,cypher]
 ----
 MATCH (t:Track)
@@ -156,7 +162,8 @@ image::devoxx-track-browser.png[]
 .Find the top 10 Tags that talks in the Java Track share and their frequency
 [source,cypher]
 ----
-MATCH (tag:Tag)<--(t:Talk)-->(tr:Track {name:'Java'})<--(:Talk)-->(tag)
+MATCH (tag:Tag)<--(t:Talk)-->(tr:Track)<--(:Talk)-->(tag)
+WHERE tr.name = 'Java'
 RETURN tag.name, count(distinct t) as freq
 ORDER BY freq DESC LIMIT 10;
 ----
@@ -191,13 +198,42 @@ Note that the last query is computing the equivalent of an 6-way join.
 
 Now what we're interested in is to create some recommendations for a talk we've seen and liked.
 
-So talks are similar in a few relationships - they can share a speaker, a track or a topic (or a room but that's not indicative of similarity).
-There could also be some attributes that could be similar, like audience leel or session type, but we'll ignore them for now.
+So talks have similarities in a few aspects - they can share a speaker, a track or a topic (or a room but that's not indicative of similarity).
+There could also be some attributes that could be similar, like audience level or session type, but we'll ignore these for now.
 
+.Recommendation - similar talks to our talk
 [source,cypher]
 ----
-
+// find our talk
+MATCH (t:Talk {title:''})
+// determine overlap
+MATCH (t)--(x)--(reco:Talk)
+WHERE id(t) < id(reco) and not x:Room
+// return top recommendation by occurence frequency
+RETURN reco, count(*) AS freq
+ORDER BY freq DESC LIMIT 5;
 ----
+
+If we want to know in which aspects the recommendations overlap, we can extract that information and return it too.
+
+.Recommendation - similar talks to our talk with overlap detail
+[source,cypher]
+----
+// find our talk
+MATCH (t:Talk {title:''})
+// determine overlap
+MATCH (t)--(x)--(reco:Talk)
+WHERE id(t) < id(reco) and not x:Room
+// extract type and name of overlap and individual freq
+WITH reco, head(labels(x)) as type, x.name as what, count(*) as count
+// return top recommendation by total occurence frequency
+RETURN reco.title, sum(count) as freq, 
+// include a list of overlaps
+       collect([type,what,count]) as overlap
+ORDER BY freq DESC LIMIT 5;
+----
+
+TODO table
 
 === GraphQL
 
@@ -207,9 +243,10 @@ But what if I want to expose (a subset) of my data through an API? (Similar to t
 
 Then the neo4j/graphql library can help you to get up and running quickly and offers a lot of flexibility and power down the line.
 
-Just open https://graphql-toolbox.neo4j.io for an in-browser GraphQL model and query editor.
+Just open https://graphql-toolbox.neo4j.io for an in-browser GraphQL model- and query editor.
 
-After filling in the connection details it offers to derive a new GraphQL schema from your database, if you do this, you get a pretty good set of type defintions.
+After filling in the connection details it offers to derive a new GraphQL schema from your database.
+If you do this, you get a pretty good set of type definitions.
 The only bit that's a bit verbose are some of the field-names which we can rename directly in the editor.
 
 // image:devoxx-toolbox.png[]
@@ -381,10 +418,10 @@ We load our credentials file into `application.properties` to then use the envir
 
 [source,ini]
 ----
-spring.config.import=optional:file:../devoxx-credentials.env
-spring.neo4j.uri=$NEO4J_URI
-spring.neo4j.authentication.username=$NEO4J_USERNAME
-spring.neo4j.authentication.password=$NEO4J_PASSWORD
+spring.config.import=optional:file:../devoxx-credentials.env[.properties]
+spring.neo4j.uri=${NEO4J_URI}
+spring.neo4j.authentication.username=${NEO4J_USERNAME}
+spring.neo4j.authentication.password=${NEO4J_PASSWORD}
 ----
 
 In our [Spring Boot App^] we add a few annotated entity classes for our our domain `Talk`, `Speaker` and `Tag` with a minimal `toString` method each.
@@ -647,57 +684,37 @@ Initially we fetch the 5 days from the `schedules` endpoint and then iterate and
 
 [source,cypher]
 ----
-CALL apoc.load.json("https://dvbe22.cfp.dev/api/public/schedules") YIELD value
-UNWIND value.links AS day
+call apoc.load.json("https://dvbe22.cfp.dev/api/public/schedules") yield value
+unwind value.links as day
 
-// load each day's schedule
-CALL apoc.load.json(day.href) YIELD value AS row
+call apoc.load.json(day.href) yield value as row
 
-// don't load pauses
-WITH row, row.proposal AS talkData 
-WHERE NOT talkData.sessionType.isPause
+with row, row.proposal as talkData where not talkData.sessionType.isPause
 
-// add room
 MERGE (r:Room {id:row.room.id})
 ON CREATE SET r.name = row.room.name, r.capacity = row.room.capacity
 
-// add talk
-MERGE (t:Talk {id:talkData.id})
-ON CREATE SET 
-t.title = talkData.title, t.summary = talkData.summary, 
-t.level = talkData.audienceLevel,
-t.duration = talkData.sessionType.duration, 
-t.type = talkData.sessionType.name
+merge (t:Talk {id:talkData.id})
+on create set t.title = talkData.title, t.summary = talkData.summary, t.level = talkData.audienceLevel,
+t.duration = talkData.sessionType.duration, t.sessionType = talkData.sessionType.name
 
-SET t.favorites = row.totalFavourites, 
-t.start = datetime(row.fromDate), 
-t.end = datetime(row.toDate)
+SET t.favorites = row.totalFavourites, t.startTime = datetime(row.fromDate), t.endTime = datetime(row.toDate)
 
-// connect talk to room
-MERGE (t)-[:IN_ROOM]->(r)
+merge (t)-[:IN_ROOM]->(r)
 
-// add and connect track
-MERGE (tr:Track {id:talkData.track.id}) 
-ON CREATE SET tr.name = talkData.track.name, 
-tr.description = talkData.track.description
-MERGE (t)-[:IN_TRACK]->(tr)
+merge (tr:Track {id:talkData.track.id}) on create set tr.name = talkData.track.name, tr.description = talkData.track.description
+merge (t)-[:IN_TRACK]->(tr)
 
 with * 
-// add and connect speakers
-UNWIND talkData.speakers AS speaker
-MERGE (sp:Speaker {id:speaker.id})
-ON CREATE SET sp.name = speaker.fullName, 
-sp.company = speaker.company, sp.image = speaker.imageUrl, 
-sp.twitter = speaker.twitterHandle
-MERGE (sp)-[:PRESENTS]->(t)
+unwind talkData.speakers as speaker
+merge (sp:Speaker {id:speaker.id})
+on create set sp.name = speaker.fullName, sp.company = speaker.company, sp.image = speaker.imageUrl, sp.twitter = speaker.twitterHandle
+merge (sp)-[:PRESENTS]->(t)
 
-// reduce cardinality
 with distinct talkData, t
-
-// add tags
-UNWIND talkData.tags AS tag
-MERGE (tg:Tag {name:tag.name})
-MERGE (t)-[:TAGGED]->(tg);
+unwind talkData.tags as tag
+merge (tg:Tag {name:tag.name})
+merge (t)-[:TAGGED]->(tg);
 ----
 
 === Conclusion
